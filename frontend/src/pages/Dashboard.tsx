@@ -1,40 +1,42 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api/client";
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  BarChart, Bar, PieChart, Pie, Cell, Legend,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
-import { useEffect } from "react";
-import { WS_URL } from "../api/client";
-import { useAuth } from "../store/auth";
 
 const COLORS = ["#0ea5e9", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"];
 
 export default function Dashboard() {
-  const token = useAuth((s) => s.token);
-
   const stats = useQuery({
     queryKey: ["dash-stats"],
     queryFn: () => api.get("/api/dashboard/stats?days=7").then((r) => r.data),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
   const ts = useQuery({
     queryKey: ["dash-ts"],
     queryFn: () => api.get("/api/dashboard/timeseries?days=14").then((r) => r.data),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
   const recent = useQuery({
     queryKey: ["dash-recent"],
     queryFn: () => api.get("/api/dashboard/recent").then((r) => r.data),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
-
-  // live WS ping — просто инвалидируем кэш при изменениях
-  useEffect(() => {
-    if (!token) return;
-    const ws = new WebSocket(WS_URL());
-    ws.onmessage = () => {
-      stats.refetch(); ts.refetch(); recent.refetch();
-    };
-    return () => ws.close();
-  }, [token]);
 
   if (stats.isLoading) return <div className="p-8">Загрузка…</div>;
   const s = stats.data;
