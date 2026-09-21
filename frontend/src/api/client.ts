@@ -1,10 +1,8 @@
 import axios from "axios";
 
-// In production, VITE_API_URL points to the Railway backend domain.
-// In dev, Vite proxies /api to localhost:8000.
-const baseURL = import.meta.env.VITE_API_URL || "";
-
-export const api = axios.create({ baseURL });
+// Один домен — nginx сам проксирует /api на бэкенд.
+// В dev Vite proxy работает так же.
+export const api = axios.create({ baseURL: "" });
 
 api.interceptors.request.use((cfg) => {
   const token = localStorage.getItem("token");
